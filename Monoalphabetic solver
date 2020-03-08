@@ -1,4 +1,4 @@
-#initialize values
+#parse and format
 f = open('dictionary.lst')
 contents = f.read()
 contents = contents.lower()
@@ -12,6 +12,7 @@ for i in ciphertext:
         longest = len(i)
         longestWord = i
 
+#detect isomoprh
 def isIsomorphic(str1, str2):
     len1 = len(str1)
     len2 = len(str2)
@@ -21,45 +22,50 @@ def isIsomorphic(str1, str2):
     dict2 = {}
     for i in range(len(str1)):
         if dict1[str1[i]] == [False]:
-      #a false value matching a previously mapped value
             if str2[i] in list(dict2):
                 return(False)
             else:
                 dict1[str1[i]] = str2[i]
                 dict2[str2[i]] = str1[i]
-    #check if key matches this non false value to catch duplicate in str1
         elif dict1[str1[i]] != str2[i]:
             return(False)
     return(True)
 
-#now we want to start by finding an isomorphic match on the longest word
+#generate masterkey
 def decipher(cipherword, crib, ctext=ciphertext, wordList=content_list, length=longest):
-        revKey = dict(zip(set(crib),set(cipherword)))
-        key = dict(zip(list(cipherword),list(crib)))
-        n=longest
-        while n > 1 and len(list(key)) < 26:
-            for cipherword in ctext:
-                if len(cipherword) == n:
-                    for word in wordList:
-                        if isIsomorphic(cipherword,word) is True:
+    key = dict(zip(list(cipherword),list(crib)))
+    tempKey = dict(zip(list(cipherword),list(crib)))
+    n=longest
+    while n > 1 and len(list(key)) < 26:
+        for cipherword in ctext:
+            if len(cipherword) == n:
+                for word in wordList:
+                    if isIsomorphic(cipherword,word) is True:
+                        count=0
+                        for numletter in range(len(cipherword)):
+                            if cipherword[numletter] in list(key):
+                                    
+                                    #get rid of the false poitive isomorphs
+                                if key[cipherword[numletter]] != word[numletter]:
+                                    break
+                                else:
+                                        count = count+1
+                        if count > 1:
                             for numletter in range(len(cipherword)):
                                 if cipherword[numletter] not in list(key):
                                     key[cipherword[numletter]]=word[numletter]
-                                    revKey[word[numletter]]=cipherword[numletter]
-            n=n-1
-        return(key)
+        n=n-1
+    return(key)
 
-
-        #the first thing we need to do is build the key
-
+#match longest ismorph to match seed, use seed to generate full key off matches
 for i in content_list:
     if len(i) == longest:
         if isIsomorphic(i, longestWord) is True:   
-            
-            codebreak = decipher(longestWord,i)
-            #begin deciphering here I guess.
+            masterkey = decipher(longestWord,i)
             plaintext = ''
-codebreak[" "]=" "
+masterkey[" "]=" "
+
+#use key to decipher full plaintext from ciphertext
 for letter in inputString:
-    plaintext=plaintext+str(codebreak[letter])
+    plaintext=plaintext+str(masterkey[letter])
 print(plaintext) 
